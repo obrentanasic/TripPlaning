@@ -1,0 +1,18 @@
+/* Design tokens — lifted verbatim from the Putopis.html mockup. */
+
+:root {
+  --bg: #f5efe6;
+  --bg-2: #ede4d3;
+  --paper: #fbf7f0;
+  --ink: #1a1612;
+  --ink-2: #4a4239;
+  --ink-3: #80766a;
+  --rule: #d9cdb8;
+  --rule-2: #c8b99c;
+  --terra: #b5563a;
+  --terra-2: #8e3f26;
+  --forest: #3f5b43;
+  --sand: #e8dcc8;
+  --gold: #c89b3c;
+  --danger: #a8341e;
+}

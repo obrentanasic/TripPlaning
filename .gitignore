@@ -1,0 +1,30 @@
+# Frontend
+frontend/node_modules
+frontend/dist
+frontend/.vite
+frontend/.env
+frontend/.env.local
+
+# Backend
+backend/**/bin/
+backend/**/obj/
+backend/**/*.user
+backend/.vs/
+backend/packages/
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Generated
+docs/api.html
