@@ -41,7 +41,7 @@ export function NewTripModal({ onSave, onCancel }: Props) {
     if (!form.naziv.trim()) return setError('Naziv je obavezan.');
     if (!form.pocetak || !form.kraj) return setError('Datumi su obavezni.');
     if (new Date(form.kraj) < new Date(form.pocetak))
-      return setError('Krajnji datum ne može biti prije početnog datuma.');
+      return setError('Krajnji datum ne može biti pre početnog datuma.');
     const budzet = Number(form.budzet || 0);
     if (Number.isNaN(budzet) || budzet < 0)
       return setError('Budžet mora biti broj veći ili jednak nuli.');
@@ -195,7 +195,7 @@ export function NewTripModal({ onSave, onCancel }: Props) {
             <textarea
               value={form.napomene}
               onChange={(e) => setForm({ ...form, napomene: e.target.value })}
-              placeholder="Sve što treba zapamtiti prije puta."
+              placeholder="Sve što treba zapamtiti pre puta."
             />
           </div>
 

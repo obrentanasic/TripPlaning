@@ -147,7 +147,7 @@ function ListaView({
     date: d,
     items: trip.aktivnosti
       .filter((a) => a.datum === d)
-      .sort((a, b) => a.vrijeme.localeCompare(b.vrijeme)),
+      .sort((a, b) => a.vreme.localeCompare(b.vreme)),
   }));
 
   if (days.length === 0) {
@@ -273,7 +273,7 @@ function ActivityCard({
     >
       <div style={{ borderRight: '1px solid var(--rule)', paddingRight: 16 }}>
         <div className="serif" style={{ fontSize: 24, lineHeight: 1 }}>
-          {activity.vrijeme}
+          {activity.vreme}
         </div>
       </div>
       <div style={{ minWidth: 0 }}>
@@ -401,7 +401,7 @@ function CalendarView({
             );
           const items = trip.aktivnosti
             .filter((a) => a.datum === d)
-            .sort((a, b) => a.vrijeme.localeCompare(b.vrijeme));
+            .sort((a, b) => a.vreme.localeCompare(b.vreme));
           const dayNum = new Date(d).getDate();
           return (
             <div
@@ -447,7 +447,7 @@ function CalendarView({
                     }}
                   >
                     <span className="mono" style={{ opacity: 0.7 }}>
-                      {a.vrijeme}
+                      {a.vreme}
                     </span>{' '}
                     {a.naziv}
                   </div>

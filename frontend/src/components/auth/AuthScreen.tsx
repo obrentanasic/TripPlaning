@@ -140,7 +140,7 @@ export function AuthScreen() {
               }}
             >
               Destinacije, dnevni raspored, troškovi i lista za pakovanje — sve na jednom
-              mjestu, spremno za dijeljenje.
+              mestu, spremno za deljenje.
             </div>
           </div>
           <div
@@ -188,7 +188,7 @@ export function AuthScreen() {
           </div>
           <div style={{ color: 'var(--ink-2)', fontSize: 14, marginBottom: 32 }}>
             {mode === 'login'
-              ? 'Prijavite se i nastavite gdje ste stali.'
+              ? 'Prijavite se i nastavite gde ste stali.'
               : 'Par detalja i krećemo.'}
           </div>
 

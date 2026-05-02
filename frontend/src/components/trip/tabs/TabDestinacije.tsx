@@ -57,7 +57,7 @@ export function TabDestinacije({ trip, canEdit, onUpdate }: Props) {
             maxWidth: 600,
           }}
         >
-          Mjesta koja planirate posjetiti tokom ovog putovanja, sa pripadajućim datumima i napomenama.
+          Mesta koja planirate posetiti tokom ovog putovanja, sa pripadajućim datumima i napomenama.
         </div>
         {canEdit && (
           <button

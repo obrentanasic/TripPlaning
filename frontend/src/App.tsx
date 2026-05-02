@@ -7,6 +7,9 @@ import { Dashboard } from './components/dashboard/Dashboard';
 import { TripDetail } from './components/trip/TripDetail';
 import { NewTripModal } from './components/modals/NewTripModal';
 import { ConfirmDialog } from './components/modals/ConfirmDialog';
+import { ShareModal } from './components/modals/ShareModal';
+import { PdfPreview } from './components/modals/PdfPreview';
+import type { SaradnikUloga } from './models/Trip';
 import { useService } from './hooks/useService';
 import type { Trip } from './models/Trip';
 import type { CreateTripRequest } from './dto/trip.dto';
@@ -23,6 +26,8 @@ function Shell() {
 
   const [showNewTrip, setShowNewTrip] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [showShare, setShowShare] = useState(false);
+  const [showPdf, setShowPdf] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -59,6 +64,17 @@ function Shell() {
     } catch (err) {
       show(err instanceof Error ? err.message : 'Greška pri čuvanju');
     }
+  };
+
+  const addCollaborator = (collab: { ime: string; email: string; uloga: SaradnikUloga }) => {
+    const openTrip = trips.find((t) => t.id === openTripId);
+    if (!openTrip) return;
+    if (openTrip.saradnici.some((s) => s.email === collab.email)) {
+      show('Saradnik je već dodan.');
+      return;
+    }
+    update({ ...openTrip, saradnici: [...openTrip.saradnici, collab] });
+    show('Saradnik dodan');
   };
 
   const open = (id: string) => {
@@ -118,8 +134,8 @@ function Shell() {
             <TripDetail
               trip={openTrip}
               onBack={() => navigate('dashboard')}
-              onShare={() => show('Share modal — Checkpoint 6')}
-              onPdfExport={() => show('PDF preview — Checkpoint 6')}
+              onShare={() => setShowShare(true)}
+              onPdfExport={() => setShowPdf(true)}
               onUpdate={update}
             />
           );
@@ -152,6 +168,26 @@ function Shell() {
           onCancel={() => setConfirmDelete(null)}
         />
       )}
+      {showShare &&
+        openTripId &&
+        (() => {
+          const openTrip = trips.find((t) => t.id === openTripId);
+          if (!openTrip) return null;
+          return (
+            <ShareModal
+              trip={openTrip}
+              onClose={() => setShowShare(false)}
+              onAddCollab={addCollaborator}
+            />
+          );
+        })()}
+      {showPdf &&
+        openTripId &&
+        (() => {
+          const openTrip = trips.find((t) => t.id === openTripId);
+          if (!openTrip) return null;
+          return <PdfPreview trip={openTrip} onClose={() => setShowPdf(false)} />;
+        })()}
     </div>
   );
 }

@@ -35,7 +35,7 @@ export function TabBiljeske({ trip, canEdit, onUpdate }: Props) {
 
   return (
     <div>
-      <SectionHeader title="Bilješke i podsjetnici" />
+      <SectionHeader title="Beleške i podsetnici" />
 
       <div
         style={{
@@ -50,7 +50,7 @@ export function TabBiljeske({ trip, canEdit, onUpdate }: Props) {
             value={tekst}
             onChange={(e) => setTekst(e.target.value)}
             disabled={!canEdit}
-            placeholder="Dodajte bilješke za putovanje..."
+            placeholder="Dodajte beleške za putovanje..."
             style={{
               width: '100%',
               minHeight: 400,
@@ -93,7 +93,7 @@ export function TabBiljeske({ trip, canEdit, onUpdate }: Props) {
                 disabled={!dirty}
                 style={{ opacity: dirty ? 1 : 0.5 }}
               >
-                Sačuvaj bilješke
+                Sačuvaj beleške
               </button>
             </div>
           )}

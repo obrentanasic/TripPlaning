@@ -2,7 +2,7 @@ export type AktivnostStatus = 'planirano' | 'rezervisano' | 'završeno' | 'otkaz
 
 export type KategorijaTroska =
   | 'prevoz'
-  | 'smjestaj'
+  | 'smestaj'
   | 'hrana'
   | 'ulaznice'
   | 'kupovina'
@@ -32,7 +32,7 @@ export interface Aktivnost {
   destId?: string;
   naziv: string;
   datum: string;
-  vrijeme: string;
+  vreme: string;
   lokacija: string;
   opis: string;
   trosak: number;
@@ -92,7 +92,7 @@ export interface KategorijaChecklistDef {
 
 export const KATEGORIJE_TROSKOVA: KategorijaTroskaDef[] = [
   { id: 'prevoz', naziv: 'Prevoz', boja: '#B5563A' },
-  { id: 'smjestaj', naziv: 'Smještaj', boja: '#3F5B43' },
+  { id: 'smestaj', naziv: 'Smeštaj', boja: '#3F5B43' },
   { id: 'hrana', naziv: 'Hrana', boja: '#C89B3C' },
   { id: 'ulaznice', naziv: 'Ulaznice', boja: '#8E3F26' },
   { id: 'kupovina', naziv: 'Kupovina', boja: '#80766A' },

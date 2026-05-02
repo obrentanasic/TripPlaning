@@ -18,7 +18,7 @@ interface Props {
   onUpdate: (t: Trip) => void;
 }
 
-type TabId = 'pregled' | 'destinacije' | 'dani' | 'troskovi' | 'checklist' | 'bilješke';
+type TabId = 'pregled' | 'destinacije' | 'dani' | 'troskovi' | 'checklist' | 'beleske';
 
 interface TabDef {
   id: TabId;
@@ -44,7 +44,7 @@ export function TripDetail({
     { id: 'dani', label: 'Dani', count: trip.aktivnosti.length },
     { id: 'troskovi', label: 'Troškovi', count: trip.troskovi.length },
     { id: 'checklist', label: 'Checklist', count: trip.checklist.length },
-    { id: 'bilješke', label: 'Bilješke' },
+    { id: 'beleske', label: 'Beleške' },
   ];
 
   return (
@@ -189,7 +189,7 @@ export function TripDetail({
                 }}
                 onClick={onShare}
               >
-                <Icon.share /> Podijeli
+                <Icon.share /> Podeli
               </button>
             </div>
           </div>
@@ -287,7 +287,7 @@ export function TripDetail({
         {tab === 'checklist' && (
           <TabChecklist trip={trip} canEdit={canEdit} onUpdate={onUpdate} />
         )}
-        {tab === 'bilješke' && (
+        {tab === 'beleske' && (
           <TabBiljeske trip={trip} canEdit={canEdit} onUpdate={onUpdate} />
         )}
       </div>

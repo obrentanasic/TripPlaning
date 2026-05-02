@@ -132,7 +132,7 @@ export function TabPregled({ trip, setTab }: Props) {
             title="Predstojeće aktivnosti"
             count={trip.aktivnosti.length}
             action={() => setTab('dani')}
-            actionLabel="Cijeli raspored"
+            actionLabel="Ceo raspored"
           />
           {trip.aktivnosti.length === 0 ? (
             <EmptyHint>Nema unesenih aktivnosti za ovo putovanje.</EmptyHint>
@@ -336,7 +336,7 @@ export function TabPregled({ trip, setTab }: Props) {
           </div>
           {trip.saradnici.length === 0 ? (
             <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
-              Niste podijelili plan ni sa kim.
+              Niste podelili plan ni sa kim.
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

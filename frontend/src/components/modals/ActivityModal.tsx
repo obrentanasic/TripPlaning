@@ -20,7 +20,7 @@ export function ActivityModal({ activity, days, onSave, onCancel }: Props) {
   const [f, setF] = useState<Partial<Aktivnost>>({
     naziv: '',
     datum: days[0] || '',
-    vrijeme: '09:00',
+    vreme: '09:00',
     lokacija: '',
     opis: '',
     trosak: 0,
@@ -115,8 +115,8 @@ export function ActivityModal({ activity, days, onSave, onCancel }: Props) {
               <label>Vrijeme</label>
               <input
                 type="time"
-                value={f.vrijeme}
-                onChange={(e) => setF({ ...f, vrijeme: e.target.value })}
+                value={f.vreme}
+                onChange={(e) => setF({ ...f, vreme: e.target.value })}
               />
             </div>
           </div>
@@ -129,7 +129,7 @@ export function ActivityModal({ activity, days, onSave, onCancel }: Props) {
           </div>
           <div className="row-2">
             <div className="field">
-              <label>Procijenjeni trošak (EUR)</label>
+              <label>Procenjeni trošak (EUR)</label>
               <input
                 type="number"
                 min={0}

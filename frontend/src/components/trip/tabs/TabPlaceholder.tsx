@@ -36,7 +36,7 @@ export function TabPlaceholder({ title, checkpoint }: Props) {
           maxWidth: 360,
         }}
       >
-        Tab je vidljiv ali sadržaj se gradi u sljedećem checkpointu plana.
+        Tab je vidljiv ali sadržaj se gradi u sledećem checkpointu plana.
       </div>
     </div>
   );

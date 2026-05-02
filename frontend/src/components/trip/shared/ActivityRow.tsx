@@ -28,7 +28,7 @@ export function ActivityRow({ activity }: { activity: Aktivnost }) {
           {fmtDateShort(activity.datum).toUpperCase()}
         </div>
         <div className="serif" style={{ fontSize: 22, lineHeight: 1 }}>
-          {activity.vrijeme}
+          {activity.vreme}
         </div>
       </div>
       <div style={{ width: 1, height: 32, background: 'var(--rule)' }} />

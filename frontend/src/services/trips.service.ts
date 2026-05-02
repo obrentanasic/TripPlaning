@@ -32,7 +32,7 @@ export class MockTripsService implements ITripsService {
   async create(payload: CreateTripRequest): Promise<Trip> {
     await sleep(200);
     if (new Date(payload.kraj) < new Date(payload.pocetak)) {
-      throw new Error('Krajnji datum ne može biti prije početnog datuma.');
+      throw new Error('Krajnji datum ne može biti pre početnog datuma.');
     }
     if (payload.budzet < 0) {
       throw new Error('Budžet ne može biti negativan.');
@@ -53,7 +53,7 @@ export class MockTripsService implements ITripsService {
   async update(trip: Trip): Promise<Trip> {
     await sleep(150);
     if (new Date(trip.kraj) < new Date(trip.pocetak)) {
-      throw new Error('Krajnji datum ne može biti prije početnog datuma.');
+      throw new Error('Krajnji datum ne može biti pre početnog datuma.');
     }
     if (trip.budzet < 0) {
       throw new Error('Budžet ne može biti negativan.');
