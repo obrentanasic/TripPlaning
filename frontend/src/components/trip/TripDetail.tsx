@@ -3,7 +3,11 @@ import type { Trip } from '../../models/Trip';
 import { daysBetween, fmtDate } from '../../lib/format';
 import { Icon } from '../ui/Icon';
 import { TabPregled } from './tabs/TabPregled';
-import { TabPlaceholder } from './tabs/TabPlaceholder';
+import { TabDestinacije } from './tabs/TabDestinacije';
+import { TabDani } from './tabs/TabDani';
+import { TabTroskovi } from './tabs/TabTroskovi';
+import { TabChecklist } from './tabs/TabChecklist';
+import { TabBiljeske } from './tabs/TabBiljeske';
 
 interface Props {
   trip: Trip;
@@ -11,6 +15,7 @@ interface Props {
   onBack: () => void;
   onShare: () => void;
   onPdfExport: () => void;
+  onUpdate: (t: Trip) => void;
 }
 
 type TabId = 'pregled' | 'destinacije' | 'dani' | 'troskovi' | 'checklist' | 'bilješke';
@@ -27,6 +32,7 @@ export function TripDetail({
   onBack,
   onShare,
   onPdfExport,
+  onUpdate,
 }: Props) {
   const [tab, setTab] = useState<TabId>('pregled');
   const canEdit = accessLevel === 'edit';
@@ -270,17 +276,19 @@ export function TripDetail({
           <TabPregled trip={trip} setTab={(t) => setTab(t as TabId)} />
         )}
         {tab === 'destinacije' && (
-          <TabPlaceholder title="Destinacije" checkpoint="Checkpoint 5" />
+          <TabDestinacije trip={trip} canEdit={canEdit} onUpdate={onUpdate} />
         )}
-        {tab === 'dani' && <TabPlaceholder title="Dnevni raspored" checkpoint="Checkpoint 5" />}
+        {tab === 'dani' && (
+          <TabDani trip={trip} canEdit={canEdit} onUpdate={onUpdate} />
+        )}
         {tab === 'troskovi' && (
-          <TabPlaceholder title="Troškovi i budžet" checkpoint="Checkpoint 5" />
+          <TabTroskovi trip={trip} canEdit={canEdit} onUpdate={onUpdate} />
         )}
         {tab === 'checklist' && (
-          <TabPlaceholder title="Checklist / lista pakovanja" checkpoint="Checkpoint 5" />
+          <TabChecklist trip={trip} canEdit={canEdit} onUpdate={onUpdate} />
         )}
         {tab === 'bilješke' && (
-          <TabPlaceholder title="Bilješke" checkpoint="Checkpoint 5" />
+          <TabBiljeske trip={trip} canEdit={canEdit} onUpdate={onUpdate} />
         )}
       </div>
     </div>

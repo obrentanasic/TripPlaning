@@ -51,6 +51,16 @@ function Shell() {
     show('Plan obrisan');
   };
 
+  const update = async (next: Trip) => {
+    try {
+      const saved = await tripsApi.update(next);
+      setTrips((prev) => prev.map((t) => (t.id === saved.id ? saved : t)));
+      show('Sačuvano');
+    } catch (err) {
+      show(err instanceof Error ? err.message : 'Greška pri čuvanju');
+    }
+  };
+
   const open = (id: string) => {
     setOpenTripId(id);
     setView('trip');
@@ -110,6 +120,7 @@ function Shell() {
               onBack={() => navigate('dashboard')}
               onShare={() => show('Share modal — Checkpoint 6')}
               onPdfExport={() => show('PDF preview — Checkpoint 6')}
+              onUpdate={update}
             />
           );
         })()}
