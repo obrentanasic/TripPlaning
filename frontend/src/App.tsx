@@ -4,6 +4,7 @@ import { ToastProvider, useToast } from './context/ToastContext';
 import { AuthScreen } from './components/auth/AuthScreen';
 import { TopNav, type TopView } from './components/layout/TopNav';
 import { Dashboard } from './components/dashboard/Dashboard';
+import { TripDetail } from './components/trip/TripDetail';
 import { NewTripModal } from './components/modals/NewTripModal';
 import { ConfirmDialog } from './components/modals/ConfirmDialog';
 import { useService } from './hooks/useService';
@@ -90,40 +91,28 @@ function Shell() {
           />
         ))}
 
-      {view === 'trip' && openTripId && (
-        <main
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 64,
-            flexDirection: 'column',
-            gap: 12,
-          }}
-        >
-          <div
-            className="mono"
-            style={{
-              fontSize: 11,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color: 'var(--ink-3)',
-            }}
-          >
-            Trip detail — Checkpoint 4
-          </div>
-          <div className="serif" style={{ fontSize: 32 }}>
-            {trips.find((t) => t.id === openTripId)?.naziv}
-          </div>
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => navigate('dashboard')}
-          >
-            ← Nazad na planove
-          </button>
-        </main>
-      )}
+      {view === 'trip' &&
+        openTripId &&
+        (() => {
+          const openTrip = trips.find((t) => t.id === openTripId);
+          if (!openTrip) {
+            return (
+              <main style={{ padding: 64, textAlign: 'center' }}>
+                <div className="mono" style={{ color: 'var(--ink-3)' }}>
+                  Plan nije pronađen.
+                </div>
+              </main>
+            );
+          }
+          return (
+            <TripDetail
+              trip={openTrip}
+              onBack={() => navigate('dashboard')}
+              onShare={() => show('Share modal — Checkpoint 6')}
+              onPdfExport={() => show('PDF preview — Checkpoint 6')}
+            />
+          );
+        })()}
 
       {view === 'admin' && (
         <main

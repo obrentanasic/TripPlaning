@@ -28,3 +28,6 @@ npm-debug.log*
 
 # Generated
 docs/api.html
+
+# Claude Code local settings
+.claude/
