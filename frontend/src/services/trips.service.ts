@@ -1,14 +1,42 @@
 import type { CreateTripRequest } from '../dto/trip.dto';
-import type { Trip } from '../models/Trip';
+import type {
+  Aktivnost,
+  ChecklistItem,
+  Destinacija,
+  Trip,
+  Trosak,
+} from '../models/Trip';
 import { uid } from '../lib/format';
 import { SAMPLE_TRIPS } from '../lib/sampleData';
 
 export interface ITripsService {
+  // top-level
   list(): Promise<Trip[]>;
   get(id: string): Promise<Trip>;
   create(payload: CreateTripRequest): Promise<Trip>;
   update(trip: Trip): Promise<Trip>;
   remove(id: string): Promise<void>;
+
+  // destinations
+  addDestination(tripId: string, dest: Omit<Destinacija, 'id'>): Promise<Destinacija>;
+  updateDestination(tripId: string, dest: Destinacija): Promise<Destinacija>;
+  removeDestination(tripId: string, destId: string): Promise<void>;
+
+  // activities
+  addActivity(tripId: string, activity: Omit<Aktivnost, 'id'>): Promise<Aktivnost>;
+  updateActivity(tripId: string, activity: Aktivnost): Promise<Aktivnost>;
+  removeActivity(tripId: string, activityId: string): Promise<void>;
+
+  // expenses
+  addExpense(tripId: string, expense: Omit<Trosak, 'id'>): Promise<Trosak>;
+  updateExpense(tripId: string, expense: Trosak): Promise<Trosak>;
+  removeExpense(tripId: string, expenseId: string): Promise<void>;
+
+  // checklist
+  addChecklistItem(tripId: string, item: Omit<ChecklistItem, 'id'>): Promise<ChecklistItem>;
+  updateChecklistItem(tripId: string, item: ChecklistItem): Promise<ChecklistItem>;
+  toggleChecklistItem(tripId: string, itemId: string, zavrseno: boolean): Promise<ChecklistItem>;
+  removeChecklistItem(tripId: string, itemId: string): Promise<void>;
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -66,4 +94,24 @@ export class MockTripsService implements ITripsService {
     await sleep(150);
     this.trips = this.trips.filter((t) => t.id !== id);
   }
+
+  // Stubs — the mock service exists for offline visual demos only;
+  // nested mutations in checkpoint 10+ flow through HttpTripsService.
+  private notSupported(): never {
+    throw new Error('Nested mutations are only supported via HttpTripsService.');
+  }
+
+  addDestination = () => this.notSupported();
+  updateDestination = () => this.notSupported();
+  removeDestination = () => this.notSupported();
+  addActivity = () => this.notSupported();
+  updateActivity = () => this.notSupported();
+  removeActivity = () => this.notSupported();
+  addExpense = () => this.notSupported();
+  updateExpense = () => this.notSupported();
+  removeExpense = () => this.notSupported();
+  addChecklistItem = () => this.notSupported();
+  updateChecklistItem = () => this.notSupported();
+  toggleChecklistItem = () => this.notSupported();
+  removeChecklistItem = () => this.notSupported();
 }

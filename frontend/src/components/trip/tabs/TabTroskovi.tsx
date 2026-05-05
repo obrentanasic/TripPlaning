@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import type { Trip, Trosak, KategorijaTroska } from '../../../models/Trip';
 import { KATEGORIJE_TROSKOVA } from '../../../models/Trip';
-import { fmtCurrency, fmtDateShort, uid } from '../../../lib/format';
+import { fmtCurrency, fmtDateShort } from '../../../lib/format';
+import { useService } from '../../../hooks/useService';
+import { useToast } from '../../../context/ToastContext';
 import { Icon } from '../../ui/Icon';
 import { SectionHeader } from '../shared/SectionHeader';
 import { ExpenseModal } from '../../modals/ExpenseModal';
@@ -59,8 +61,11 @@ function BigStat({
 }
 
 export function TabTroskovi({ trip, canEdit, onUpdate }: Props) {
+  const tripsApi = useService('trips');
+  const { show } = useToast();
   const [editing, setEditing] = useState<Partial<Trosak> | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
+  const [busy, setBusy] = useState(false);
 
   const trosak = trip.troskovi.reduce((s, t) => s + t.iznos, 0);
   const ostalo = trip.budzet - trosak;
@@ -69,22 +74,44 @@ export function TabTroskovi({ trip, canEdit, onUpdate }: Props) {
       ? trip.troskovi
       : trip.troskovi.filter((t) => t.kategorija === filter);
 
-  const remove = (id: string) =>
-    onUpdate({ ...trip, troskovi: trip.troskovi.filter((t) => t.id !== id) });
-
-  const save = (t: Trosak | (Omit<Trosak, 'id'> & { id?: string })) => {
-    if (t.id) {
-      onUpdate({
-        ...trip,
-        troskovi: trip.troskovi.map((x) => (x.id === t.id ? (t as Trosak) : x)),
-      });
-    } else {
-      onUpdate({
-        ...trip,
-        troskovi: [...trip.troskovi, { ...(t as Trosak), id: uid() }],
-      });
+  const remove = async (id: string) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await tripsApi.removeExpense(trip.id, id);
+      onUpdate({ ...trip, troskovi: trip.troskovi.filter((t) => t.id !== id) });
+      show('Trošak obrisan');
+    } catch (err) {
+      show(err instanceof Error ? err.message : 'Greška pri brisanju.');
+    } finally {
+      setBusy(false);
     }
-    setEditing(null);
+  };
+
+  const save = async (t: Trosak | (Omit<Trosak, 'id'> & { id?: string })) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (t.id) {
+        const saved = await tripsApi.updateExpense(trip.id, t as Trosak);
+        onUpdate({
+          ...trip,
+          troskovi: trip.troskovi.map((x) => (x.id === saved.id ? saved : x)),
+        });
+        show('Trošak sačuvan');
+      } else {
+        const { id: _drop, ...payload } = t as Trosak;
+        void _drop;
+        const saved = await tripsApi.addExpense(trip.id, payload);
+        onUpdate({ ...trip, troskovi: [...trip.troskovi, saved] });
+        show('Trošak dodan');
+      }
+      setEditing(null);
+    } catch (err) {
+      show(err instanceof Error ? err.message : 'Greška pri čuvanju.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   const kategPotrosnja = KATEGORIJE_TROSKOVA.map((k) => ({

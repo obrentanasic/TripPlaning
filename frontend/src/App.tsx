@@ -50,20 +50,21 @@ function Shell() {
   };
 
   const remove = async (id: string) => {
-    await tripsApi.remove(id);
-    setTrips((prev) => prev.filter((t) => t.id !== id));
-    setConfirmDelete(null);
-    show('Plan obrisan');
+    try {
+      await tripsApi.remove(id);
+      setTrips((prev) => prev.filter((t) => t.id !== id));
+      setConfirmDelete(null);
+      show('Plan obrisan');
+    } catch (err) {
+      setConfirmDelete(null);
+      show(err instanceof Error ? err.message : 'Greška pri brisanju');
+    }
   };
 
-  const update = async (next: Trip) => {
-    try {
-      const saved = await tripsApi.update(next);
-      setTrips((prev) => prev.map((t) => (t.id === saved.id ? saved : t)));
-      show('Sačuvano');
-    } catch (err) {
-      show(err instanceof Error ? err.message : 'Greška pri čuvanju');
-    }
+  // Local-only patch: tabs run their own HTTP calls and then call this
+  // to refresh App-level state without a second round-trip.
+  const patchTrip = (next: Trip) => {
+    setTrips((prev) => prev.map((t) => (t.id === next.id ? next : t)));
   };
 
   const addCollaborator = (collab: { ime: string; email: string; uloga: SaradnikUloga }) => {
@@ -73,7 +74,9 @@ function Shell() {
       show('Saradnik je već dodan.');
       return;
     }
-    update({ ...openTrip, saradnici: [...openTrip.saradnici, collab] });
+    // Collaborators are persisted server-side in Checkpoint 11 (sharing).
+    // Keep them in client state so the UI feedback stays correct.
+    patchTrip({ ...openTrip, saradnici: [...openTrip.saradnici, collab] });
     show('Saradnik dodan');
   };
 
@@ -136,7 +139,7 @@ function Shell() {
               onBack={() => navigate('dashboard')}
               onShare={() => setShowShare(true)}
               onPdfExport={() => setShowPdf(true)}
-              onUpdate={update}
+              onUpdate={patchTrip}
             />
           );
         })()}

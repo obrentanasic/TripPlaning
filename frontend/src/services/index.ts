@@ -1,6 +1,7 @@
 import { HttpAuthService, type IAuthService } from './auth.service';
 import { http } from './http';
-import { MockTripsService, type ITripsService } from './trips.service';
+import { HttpTripsService } from './http-trips.service';
+import { type ITripsService } from './trips.service';
 
 export interface Services {
   auth: IAuthService;
@@ -9,5 +10,5 @@ export interface Services {
 
 export const services: Services = {
   auth: new HttpAuthService(http),
-  trips: new MockTripsService(),
+  trips: new HttpTripsService(http),
 };

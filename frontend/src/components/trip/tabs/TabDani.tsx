@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { Aktivnost, Trip } from '../../../models/Trip';
-import { eachDay, fmtCurrency, fmtDateShort, fmtDay, uid } from '../../../lib/format';
+import { eachDay, fmtCurrency, fmtDateShort, fmtDay } from '../../../lib/format';
+import { useService } from '../../../hooks/useService';
+import { useToast } from '../../../context/ToastContext';
 import { Icon } from '../../ui/Icon';
 import { SectionHeader } from '../shared/SectionHeader';
 import { StatusPill } from '../shared/StatusPill';
@@ -15,32 +17,54 @@ interface Props {
 type View = 'lista' | 'kalendar';
 
 export function TabDani({ trip, canEdit, onUpdate }: Props) {
+  const tripsApi = useService('trips');
+  const { show } = useToast();
   const [view, setView] = useState<View>('lista');
   const [editing, setEditing] = useState<Partial<Aktivnost> | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const days = eachDay(trip.pocetak, trip.kraj);
 
-  const remove = (id: string) =>
-    onUpdate({
-      ...trip,
-      aktivnosti: trip.aktivnosti.filter((a) => a.id !== id),
-    });
-
-  const save = (a: Aktivnost | (Omit<Aktivnost, 'id'> & { id?: string })) => {
-    if (a.id) {
-      onUpdate({
-        ...trip,
-        aktivnosti: trip.aktivnosti.map((x) =>
-          x.id === a.id ? (a as Aktivnost) : x
-        ),
-      });
-    } else {
-      onUpdate({
-        ...trip,
-        aktivnosti: [...trip.aktivnosti, { ...(a as Aktivnost), id: uid() }],
-      });
+  const remove = async (id: string) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await tripsApi.removeActivity(trip.id, id);
+      onUpdate({ ...trip, aktivnosti: trip.aktivnosti.filter((a) => a.id !== id) });
+      show('Aktivnost obrisana');
+    } catch (err) {
+      show(err instanceof Error ? err.message : 'Greška pri brisanju.');
+    } finally {
+      setBusy(false);
     }
-    setEditing(null);
+  };
+
+  const save = async (
+    a: Aktivnost | (Omit<Aktivnost, 'id'> & { id?: string })
+  ) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (a.id) {
+        const saved = await tripsApi.updateActivity(trip.id, a as Aktivnost);
+        onUpdate({
+          ...trip,
+          aktivnosti: trip.aktivnosti.map((x) => (x.id === saved.id ? saved : x)),
+        });
+        show('Aktivnost sačuvana');
+      } else {
+        const { id: _drop, ...payload } = a as Aktivnost;
+        void _drop;
+        const saved = await tripsApi.addActivity(trip.id, payload);
+        onUpdate({ ...trip, aktivnosti: [...trip.aktivnosti, saved] });
+        show('Aktivnost dodana');
+      }
+      setEditing(null);
+    } catch (err) {
+      show(err instanceof Error ? err.message : 'Greška pri čuvanju.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (

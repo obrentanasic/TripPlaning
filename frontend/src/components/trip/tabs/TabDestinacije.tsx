@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { Destinacija, Trip } from '../../../models/Trip';
-import { daysBetween, fmtDateShort, uid } from '../../../lib/format';
+import { daysBetween, fmtDateShort } from '../../../lib/format';
+import { useService } from '../../../hooks/useService';
+import { useToast } from '../../../context/ToastContext';
 import { Icon } from '../../ui/Icon';
 import { SectionHeader } from '../shared/SectionHeader';
 import { DestinationModal } from '../../modals/DestinationModal';
@@ -12,29 +14,55 @@ interface Props {
 }
 
 export function TabDestinacije({ trip, canEdit, onUpdate }: Props) {
+  const tripsApi = useService('trips');
+  const { show } = useToast();
   const [editing, setEditing] = useState<Partial<Destinacija> | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const remove = (id: string) => {
-    onUpdate({
-      ...trip,
-      destinacije: trip.destinacije.filter((d) => d.id !== id),
-      aktivnosti: trip.aktivnosti.filter((a) => a.destId !== id),
-    });
+  const remove = async (id: string) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await tripsApi.removeDestination(trip.id, id);
+      onUpdate({
+        ...trip,
+        destinacije: trip.destinacije.filter((d) => d.id !== id),
+        aktivnosti: trip.aktivnosti.filter((a) => a.destId !== id),
+      });
+      show('Destinacija obrisana');
+    } catch (err) {
+      show(err instanceof Error ? err.message : 'Greška pri brisanju.');
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const save = (d: Destinacija | (Omit<Destinacija, 'id'> & { id?: string })) => {
-    if (d.id) {
-      onUpdate({
-        ...trip,
-        destinacije: trip.destinacije.map((x) => (x.id === d.id ? (d as Destinacija) : x)),
-      });
-    } else {
-      onUpdate({
-        ...trip,
-        destinacije: [...trip.destinacije, { ...(d as Destinacija), id: uid() }],
-      });
+  const save = async (
+    d: Destinacija | (Omit<Destinacija, 'id'> & { id?: string })
+  ) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (d.id) {
+        const saved = await tripsApi.updateDestination(trip.id, d as Destinacija);
+        onUpdate({
+          ...trip,
+          destinacije: trip.destinacije.map((x) => (x.id === saved.id ? saved : x)),
+        });
+        show('Destinacija sačuvana');
+      } else {
+        const { id: _drop, ...payload } = d as Destinacija;
+        void _drop;
+        const saved = await tripsApi.addDestination(trip.id, payload);
+        onUpdate({ ...trip, destinacije: [...trip.destinacije, saved] });
+        show('Destinacija dodana');
+      }
+      setEditing(null);
+    } catch (err) {
+      show(err instanceof Error ? err.message : 'Greška pri čuvanju.');
+    } finally {
+      setBusy(false);
     }
-    setEditing(null);
   };
 
   return (
@@ -50,19 +78,14 @@ export function TabDestinacije({ trip, canEdit, onUpdate }: Props) {
           gap: 12,
         }}
       >
-        <div
-          style={{
-            fontSize: 14,
-            color: 'var(--ink-2)',
-            maxWidth: 600,
-          }}
-        >
+        <div style={{ fontSize: 14, color: 'var(--ink-2)', maxWidth: 600 }}>
           Mesta koja planirate posetiti tokom ovog putovanja, sa pripadajućim datumima i napomenama.
         </div>
         {canEdit && (
           <button
             className="btn btn-terra btn-sm"
             onClick={() => setEditing({})}
+            disabled={busy}
           >
             <Icon.plus /> Dodaj destinaciju
           </button>
@@ -125,13 +148,7 @@ export function TabDestinacije({ trip, canEdit, onUpdate }: Props) {
                   <Icon.pin /> {d.lokacija}
                 </div>
               </div>
-              <div
-                style={{
-                  fontSize: 13,
-                  color: 'var(--ink-2)',
-                  lineHeight: 1.5,
-                }}
-              >
+              <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.5 }}>
                 {d.opis || (
                   <span style={{ color: 'var(--ink-3)', fontStyle: 'italic' }}>
                     nema opisa
@@ -165,12 +182,14 @@ export function TabDestinacije({ trip, canEdit, onUpdate }: Props) {
                   <button
                     className="btn btn-ghost btn-sm btn-icon"
                     onClick={() => setEditing(d)}
+                    disabled={busy}
                   >
                     <Icon.edit />
                   </button>
                   <button
                     className="btn btn-ghost btn-sm btn-icon"
                     onClick={() => remove(d.id)}
+                    disabled={busy}
                   >
                     <Icon.trash />
                   </button>

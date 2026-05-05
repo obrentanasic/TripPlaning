@@ -4,7 +4,8 @@ import type {
   KategorijaChecklist,
 } from '../../../models/Trip';
 import { KATEGORIJE_CHECKLIST } from '../../../models/Trip';
-import { uid } from '../../../lib/format';
+import { useService } from '../../../hooks/useService';
+import { useToast } from '../../../context/ToastContext';
 import { Icon } from '../../ui/Icon';
 import { SectionHeader } from '../shared/SectionHeader';
 
@@ -20,35 +21,61 @@ interface NewState {
 }
 
 export function TabChecklist({ trip, canEdit, onUpdate }: Props) {
+  const tripsApi = useService('trips');
+  const { show } = useToast();
   const [novi, setNovi] = useState<NewState>({
     naziv: '',
     kategorija: 'dokumenti',
   });
+  const [busy, setBusy] = useState(false);
 
-  const toggle = (id: string) =>
-    onUpdate({
-      ...trip,
-      checklist: trip.checklist.map((c) =>
-        c.id === id ? { ...c, zavrseno: !c.zavrseno } : c
-      ),
-    });
+  const toggle = async (id: string) => {
+    if (busy) return;
+    const item = trip.checklist.find((c) => c.id === id);
+    if (!item) return;
+    setBusy(true);
+    try {
+      const saved = await tripsApi.toggleChecklistItem(trip.id, id, !item.zavrseno);
+      onUpdate({
+        ...trip,
+        checklist: trip.checklist.map((c) => (c.id === saved.id ? saved : c)),
+      });
+    } catch (err) {
+      show(err instanceof Error ? err.message : 'Greška.');
+    } finally {
+      setBusy(false);
+    }
+  };
 
-  const remove = (id: string) =>
-    onUpdate({
-      ...trip,
-      checklist: trip.checklist.filter((c) => c.id !== id),
-    });
+  const remove = async (id: string) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await tripsApi.removeChecklistItem(trip.id, id);
+      onUpdate({ ...trip, checklist: trip.checklist.filter((c) => c.id !== id) });
+    } catch (err) {
+      show(err instanceof Error ? err.message : 'Greška pri brisanju.');
+    } finally {
+      setBusy(false);
+    }
+  };
 
-  const add = () => {
-    if (!novi.naziv.trim()) return;
-    onUpdate({
-      ...trip,
-      checklist: [
-        ...trip.checklist,
-        { id: uid(), naziv: novi.naziv.trim(), kategorija: novi.kategorija, zavrseno: false },
-      ],
-    });
-    setNovi({ naziv: '', kategorija: novi.kategorija });
+  const add = async () => {
+    if (!novi.naziv.trim() || busy) return;
+    setBusy(true);
+    try {
+      const saved = await tripsApi.addChecklistItem(trip.id, {
+        naziv: novi.naziv.trim(),
+        kategorija: novi.kategorija,
+        zavrseno: false,
+      });
+      onUpdate({ ...trip, checklist: [...trip.checklist, saved] });
+      setNovi({ naziv: '', kategorija: novi.kategorija });
+    } catch (err) {
+      show(err instanceof Error ? err.message : 'Greška pri dodavanju.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   const grupisano = KATEGORIJE_CHECKLIST.map((k) => ({
