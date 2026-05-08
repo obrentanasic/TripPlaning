@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Putopis.Trips.Auth;
 using Putopis.Trips.Data;
 using Putopis.Trips.Data.Entities;
 using Putopis.Trips.Dto;
@@ -34,10 +36,11 @@ public class TripsController : ControllerBase
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    // ──────────────────── LIST ────────────────────
+    // ──────────────────── LIST (JWT only) ────────────────────
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken ct)
     {
+        if (User.IsShareUser()) return Forbid();
         var userId = GetUserId();
         var trips = await _db.Trips
             .AsNoTracking()
@@ -53,20 +56,39 @@ public class TripsController : ControllerBase
         return Ok(trips.Select(ToDto));
     }
 
-    // ──────────────────── GET BY ID ────────────────────
+    // ──────────────────── GET BY ID (JWT or share token) ────────────────────
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Get(Guid id, CancellationToken ct)
     {
-        var userId = GetUserId();
-        var trip = await FindTrip(id, userId, ct);
+        TripEntity? trip;
+        if (User.IsShareUser())
+        {
+            var claimed = User.FindFirstValue("tripId");
+            if (!Guid.TryParse(claimed, out var tid) || tid != id)
+                return NotFound(new { error = "Plan nije pronađen." });
+            trip = await _db.Trips
+                .Include(t => t.Destinacije)
+                .Include(t => t.Aktivnosti)
+                .Include(t => t.Troskovi)
+                .Include(t => t.Checklist)
+                .Include(t => t.Saradnici)
+                .FirstOrDefaultAsync(t => t.Id == id, ct);
+        }
+        else
+        {
+            var userId = GetUserId();
+            trip = await FindTrip(id, userId, ct);
+        }
+
         if (trip is null) return NotFound(new { error = "Plan nije pronađen." });
         return Ok(ToDto(trip));
     }
 
-    // ──────────────────── CREATE ────────────────────
+    // ──────────────────── CREATE (JWT only) ────────────────────
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateTripRequest req, CancellationToken ct)
     {
+        if (User.IsShareUser()) return Forbid();
         var result = await _createValidator.ValidateAsync(req, ct);
         if (!result.IsValid)
             return BadRequest(new { error = result.Errors[0].ErrorMessage });
@@ -93,10 +115,11 @@ public class TripsController : ControllerBase
         return CreatedAtAction(nameof(Get), new { id = entity.Id }, ToDto(entity));
     }
 
-    // ──────────────────── UPDATE ────────────────────
+    // ──────────────────── UPDATE (JWT only) ────────────────────
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTripRequest req, CancellationToken ct)
     {
+        if (User.IsShareUser()) return Forbid();
         var result = await _updateValidator.ValidateAsync(req, ct);
         if (!result.IsValid)
             return BadRequest(new { error = result.Errors[0].ErrorMessage });
@@ -121,10 +144,11 @@ public class TripsController : ControllerBase
         return Ok(ToDto(trip));
     }
 
-    // ──────────────────── DELETE (cascade) ────────────────────
+    // ──────────────────── DELETE (cascade) — JWT only ────────────────────
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
+        if (User.IsShareUser()) return Forbid();
         var userId = GetUserId();
         var trip = await _db.Trips.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId, ct);
         if (trip is null) return NotFound(new { error = "Plan nije pronađen." });

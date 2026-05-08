@@ -26,7 +26,11 @@ function extractError(payload: ApiError | undefined, fallback: string): string {
 }
 
 export class HttpTripsService implements ITripsService {
-  constructor(private readonly http: AxiosInstance) {}
+  private readonly http: AxiosInstance;
+
+  constructor(http: AxiosInstance) {
+    this.http = http;
+  }
 
   // ─────────── trips ───────────
   list = () => this.req<Trip[]>('get', '/trips', undefined, 'Greška pri učitavanju planova.');

@@ -1,6 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import type { SaradnikUloga, Trip } from '../../models/Trip';
+import { useService } from '../../hooks/useService';
+import { useToast } from '../../context/ToastContext';
 import { Icon } from '../ui/Icon';
 
 interface Props {
@@ -9,43 +11,61 @@ interface Props {
   onAddCollab: (collab: { ime: string; email: string; uloga: SaradnikUloga }) => void;
 }
 
-const shareBase =
-  (import.meta.env.VITE_SHARE_BASE_URL as string | undefined) ??
-  `${window.location.origin}/share`;
-
-const tokenStub = (tripId: string, level: SaradnikUloga) =>
-  `${tripId}-${level === 'edit' ? 'e' : 'v'}-${Math.random().toString(36).slice(2, 7)}`;
-
 export function ShareModal({ trip, onClose, onAddCollab }: Props) {
+  const shareApi = useService('share');
+  const { show } = useToast();
+
   const [accessLevel, setAccessLevel] = useState<SaradnikUloga>('view');
+  const [token, setToken] = useState<string | null>(null);
+  const [url, setUrl] = useState<string>('');
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState('');
-  const [token, setToken] = useState(() => tokenStub(trip.id, 'view'));
 
-  const url = `${shareBase}/${token}`;
-  const expiresAt = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 7);
-    return d.toLocaleDateString('sr-Latn', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  }, [token]);
-
-  const switchLevel = (next: SaradnikUloga) => {
-    setAccessLevel(next);
-    setToken(tokenStub(trip.id, next));
+  // Issue a token whenever the access level changes (or on first open).
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
     setCopied(false);
-  };
+    shareApi
+      .issueShare(trip.id, accessLevel)
+      .then((res) => {
+        if (cancelled) return;
+        setToken(res.token);
+        setUrl(res.url);
+        setExpiresAt(res.expiresAt);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        show(err instanceof Error ? err.message : 'Greška pri kreiranju share linka.');
+        setToken(null);
+        setUrl('');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [shareApi, trip.id, accessLevel, show]);
+
+  const expiresLabel = expiresAt
+    ? new Date(expiresAt).toLocaleDateString('sr-Latn', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+    : '—';
 
   const copy = async () => {
+    if (!url) return;
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      // clipboard may be unavailable on some hosts; ignore
+      /* ignore */
     }
   };
 
@@ -99,7 +119,7 @@ export function ShareModal({ trip, onClose, onAddCollab }: Props) {
                 marginBottom: 6,
               }}
             >
-              Dijeljenje plana
+              Deljenje plana
             </div>
             <h2
               className="serif"
@@ -144,13 +164,14 @@ export function ShareModal({ trip, onClose, onAddCollab }: Props) {
                 {
                   id: 'edit' as const,
                   label: 'Uređivanje',
-                  desc: 'Drugi korisnici mogu mijenjati destinacije, aktivnosti i troškove.',
+                  desc: 'Drugi korisnici mogu menjati destinacije, aktivnosti i troškove.',
                 },
               ]
             ).map((a) => (
               <button
                 key={a.id}
-                onClick={() => switchLevel(a.id)}
+                onClick={() => setAccessLevel(a.id)}
+                disabled={loading}
                 style={{
                   padding: 16,
                   textAlign: 'left',
@@ -160,13 +181,12 @@ export function ShareModal({ trip, onClose, onAddCollab }: Props) {
                     accessLevel === a.id ? 'var(--ink)' : 'var(--paper)',
                   color: accessLevel === a.id ? 'var(--paper)' : 'var(--ink)',
                   borderRadius: 2,
-                  cursor: 'pointer',
+                  cursor: loading ? 'wait' : 'pointer',
                   fontFamily: 'inherit',
+                  opacity: loading ? 0.7 : 1,
                 }}
               >
-                <div
-                  style={{ fontWeight: 500, fontSize: 14, marginBottom: 4 }}
-                >
+                <div style={{ fontWeight: 500, fontSize: 14, marginBottom: 4 }}>
                   {a.label}
                 </div>
                 <div
@@ -195,6 +215,8 @@ export function ShareModal({ trip, onClose, onAddCollab }: Props) {
               padding: 20,
               background: 'var(--bg-2)',
               border: '1px solid var(--rule)',
+              opacity: loading ? 0.6 : 1,
+              transition: 'opacity 0.15s',
             }}
           >
             <div
@@ -209,14 +231,23 @@ export function ShareModal({ trip, onClose, onAddCollab }: Props) {
                 justifyContent: 'center',
               }}
             >
-              <QRCodeSVG
-                id="putopis-share-qr"
-                value={url}
-                size={184}
-                bgColor="#FBF7F0"
-                fgColor="#1A1612"
-                level="M"
-              />
+              {url ? (
+                <QRCodeSVG
+                  id="putopis-share-qr"
+                  value={url}
+                  size={184}
+                  bgColor="#FBF7F0"
+                  fgColor="#1A1612"
+                  level="M"
+                />
+              ) : (
+                <div
+                  className="mono"
+                  style={{ fontSize: 10, color: 'var(--ink-3)' }}
+                >
+                  …
+                </div>
+              )}
             </div>
             <div>
               <div
@@ -240,15 +271,21 @@ export function ShareModal({ trip, onClose, onAddCollab }: Props) {
                   fontSize: 12,
                   wordBreak: 'break-all',
                   marginBottom: 10,
+                  minHeight: 40,
                 }}
               >
-                {url}
+                {url || (loading ? 'Generišem…' : '—')}
               </div>
               <div style={{ display: 'flex', gap: 6 }}>
                 <button
                   className="btn btn-sm"
                   onClick={copy}
-                  style={{ flex: 1, justifyContent: 'center' }}
+                  disabled={!url || loading}
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    opacity: !url || loading ? 0.6 : 1,
+                  }}
                 >
                   {copied ? (
                     <>
@@ -263,6 +300,7 @@ export function ShareModal({ trip, onClose, onAddCollab }: Props) {
                 <button
                   className="btn btn-ghost btn-sm btn-icon"
                   onClick={downloadQr}
+                  disabled={!url}
                   title="Preuzmi QR kao SVG"
                 >
                   <Icon.download />
@@ -277,7 +315,9 @@ export function ShareModal({ trip, onClose, onAddCollab }: Props) {
                   letterSpacing: '0.08em',
                 }}
               >
-                Token istječe {expiresAt} · Token tip: {accessLevel.toUpperCase()}
+                {token
+                  ? `Token istječe ${expiresLabel} · Token tip: ${accessLevel.toUpperCase()}`
+                  : 'Token nije generisan.'}
               </div>
             </div>
           </div>
