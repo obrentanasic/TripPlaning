@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <ProjectGuid>{a6b1c000-1111-4444-8888-aaaaaaaaaaaa}</ProjectGuid>
+    <ProjectVersion>2.6</ProjectVersion>
+    <NuGetPackageImportStamp />
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+    <TargetFrameworkVersion Condition=" '$(TargetFrameworkVersion)' == '' ">v4.8</TargetFrameworkVersion>
+    <DefaultPublishProfile>PublishProfiles\Local.5Node.xml</DefaultPublishProfile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Gateway\Putopis.Gateway.csproj">
+      <Name>Putopis.Gateway</Name>
+      <Project>{00000000-0000-0000-0000-000000000001}</Project>
+      <Private>False</Private>
+      <ServiceManifestRelativePath>..\Gateway\PackageRoot\ServiceManifest.xml</ServiceManifestRelativePath>
+      <PackageRoot>..\Gateway\PackageRoot</PackageRoot>
+      <ServicePackageRelativePath>GatewayPkg</ServicePackageRelativePath>
+    </ProjectReference>
+    <ProjectReference Include="..\UsersService\Putopis.Users.csproj">
+      <Name>Putopis.Users</Name>
+      <Project>{00000000-0000-0000-0000-000000000002}</Project>
+      <Private>False</Private>
+      <ServiceManifestRelativePath>..\UsersService\PackageRoot\ServiceManifest.xml</ServiceManifestRelativePath>
+      <PackageRoot>..\UsersService\PackageRoot</PackageRoot>
+      <ServicePackageRelativePath>UsersPkg</ServicePackageRelativePath>
+    </ProjectReference>
+    <ProjectReference Include="..\TripsService\Putopis.Trips.csproj">
+      <Name>Putopis.Trips</Name>
+      <Project>{00000000-0000-0000-0000-000000000003}</Project>
+      <Private>False</Private>
+      <ServiceManifestRelativePath>..\TripsService\PackageRoot\ServiceManifest.xml</ServiceManifestRelativePath>
+      <PackageRoot>..\TripsService\PackageRoot</PackageRoot>
+      <ServicePackageRelativePath>TripsPkg</ServicePackageRelativePath>
+    </ProjectReference>
+    <ProjectReference Include="..\ShareService\Putopis.Share.csproj">
+      <Name>Putopis.Share</Name>
+      <Project>{00000000-0000-0000-0000-000000000004}</Project>
+      <Private>False</Private>
+      <ServiceManifestRelativePath>..\ShareService\PackageRoot\ServiceManifest.xml</ServiceManifestRelativePath>
+      <PackageRoot>..\ShareService\PackageRoot</PackageRoot>
+      <ServicePackageRelativePath>SharePkg</ServicePackageRelativePath>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ApplicationPackageRoot\ApplicationManifest.xml" Link="ApplicationManifest.xml" />
+    <None Include="ApplicationParameters\Local.1Node.xml" />
+    <None Include="ApplicationParameters\Local.5Node.xml" />
+  </ItemGroup>
+  <PropertyGroup>
+    <ServiceFabricPackageOutputPath>pkg</ServiceFabricPackageOutputPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Service Fabric Tools\Microsoft.VisualStudio.Azure.Fabric.ApplicationProject.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Service Fabric Tools\Microsoft.VisualStudio.Azure.Fabric.ApplicationProject.targets')" />
+</Project>

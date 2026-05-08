@@ -1,3 +1,4 @@
+import { HttpAdminService, type IAdminService } from './admin.service';
 import { HttpAuthService, type IAuthService } from './auth.service';
 import { http } from './http';
 import { HttpTripsService } from './http-trips.service';
@@ -8,10 +9,12 @@ export interface Services {
   auth: IAuthService;
   trips: ITripsService;
   share: IShareService;
+  admin: IAdminService;
 }
 
 export const services: Services = {
   auth: new HttpAuthService(http),
   trips: new HttpTripsService(http),
   share: new HttpShareService(http),
+  admin: new HttpAdminService(http),
 };

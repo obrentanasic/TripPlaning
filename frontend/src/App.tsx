@@ -9,6 +9,7 @@ import { NewTripModal } from './components/modals/NewTripModal';
 import { ConfirmDialog } from './components/modals/ConfirmDialog';
 import { ShareModal } from './components/modals/ShareModal';
 import { PdfPreview } from './components/modals/PdfPreview';
+import { AdminPanel } from './components/admin/AdminPanel';
 import type { SaradnikUloga } from './models/Trip';
 import { useService } from './hooks/useService';
 import type { Trip } from './models/Trip';
@@ -144,20 +145,8 @@ function Shell() {
           );
         })()}
 
-      {view === 'admin' && (
-        <main
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 64,
-          }}
-        >
-          <div className="mono" style={{ color: 'var(--ink-3)' }}>
-            Admin panel — Checkpoint 12
-          </div>
-        </main>
+      {view === 'admin' && user.uloga === 'admin' && (
+        <AdminPanel onBack={() => navigate('dashboard')} />
       )}
 
       {showNewTrip && (

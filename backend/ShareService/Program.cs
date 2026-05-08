@@ -1,39 +1,16 @@
-using Putopis.Common.Auth;
-using Putopis.Share.Storage;
+using Microsoft.ServiceFabric.Services.Runtime;
+using Putopis.Share;
+using Putopis.Share.ServiceFabric;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddPutopisJwt(builder.Configuration);
-builder.Services.AddSingleton<IShareTokenStore, InMemoryShareTokenStore>();
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+if (Environment.GetEnvironmentVariable("Fabric_ApplicationName") is not null)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    await ServiceRuntime.RegisterServiceAsync(
+        "Putopis.ShareType",
+        ctx => new ShareStatefulService(ctx));
+    await Task.Delay(Timeout.Infinite);
 }
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-app.MapGet("/health", () => Results.Ok(new { service = "share", status = "ok", storage = "in-memory (Reliable Dictionary in Ckpt 13)" }));
-
-// Periodic cleanup of expired tokens
-_ = Task.Run(async () =>
+else
 {
-    var store = app.Services.GetRequiredService<IShareTokenStore>();
-    while (!app.Lifetime.ApplicationStopping.IsCancellationRequested)
-    {
-        try { await store.CleanupExpiredAsync(app.Lifetime.ApplicationStopping); }
-        catch { /* ignore in background loop */ }
-        await Task.Delay(TimeSpan.FromMinutes(5), app.Lifetime.ApplicationStopping);
-    }
-});
-
-app.Run();
+    var app = ShareHost.Build(args);
+    await app.RunAsync();
+}
