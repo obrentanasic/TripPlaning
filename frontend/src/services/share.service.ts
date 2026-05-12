@@ -21,7 +21,11 @@ export interface IShareService {
 }
 
 export class HttpShareService implements IShareService {
-  constructor(private readonly http: AxiosInstance) {}
+  private readonly http: AxiosInstance;
+
+  constructor(http: AxiosInstance) {
+    this.http = http;
+  }
 
   async issueShare(tripId: string, accessLevel: 'view' | 'edit') {
     const { data } = await this.http.post<IssueShareResponse>(

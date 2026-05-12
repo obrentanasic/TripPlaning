@@ -102,9 +102,6 @@ public static class Seeder
         };
         foreach (var c in chk) t.Checklist.Add(NewChecklist(t, c.n, c.k, c.z));
 
-        t.Saradnici.Add(NewCollab(t, "Marko Petrović", "marko@email.com", "edit"));
-        t.Saradnici.Add(NewCollab(t, "Ana Jovanović", "ana@email.com", "view"));
-
         return t;
     }
 
@@ -197,15 +194,5 @@ public static class Seeder
             Naziv = naziv,
             Kategorija = kat,
             Zavrseno = z,
-        };
-
-    private static CollaboratorEntity NewCollab(TripEntity t, string ime, string email, string uloga)
-        => new()
-        {
-            Id = Guid.NewGuid(),
-            Trip = t,
-            Ime = ime,
-            Email = email,
-            Uloga = uloga,
         };
 }

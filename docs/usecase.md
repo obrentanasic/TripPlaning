@@ -43,7 +43,6 @@ graph LR
         UC15[Deljenje QR koda<br/>preuzimanje SVG]
         UC16[Otvaranje deljenog plana<br/>anonimno]
         UC17[Editovanje preko<br/>EDIT tokena]
-        UC18[Dodavanje saradnika<br/>e-mailom]
     end
 
     subgraph Export ["Izvoz"]
@@ -74,7 +73,6 @@ graph LR
     Korisnik --> UC13
     Korisnik --> UC14
     Korisnik --> UC15
-    Korisnik --> UC18
     Korisnik --> UC19
     Korisnik --> UC20
 

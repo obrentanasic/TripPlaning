@@ -18,7 +18,7 @@ graph TB
 
     subgraph DB["MS SQL Server (LocalDB)"]
         UsersDB[(Putopis_Users<br/>Users)]
-        TripsDB[(Putopis_Trips<br/>Trips, Destinations,<br/>Activities, Expenses,<br/>ChecklistItems, Collaborators)]
+        TripsDB[(Putopis_Trips<br/>Trips, Destinations,<br/>Activities, Expenses,<br/>ChecklistItems)]
     end
 
     React -->|"/api/**"| Gateway
@@ -122,7 +122,6 @@ erDiagram
     Trips ||--o{ Activities : "cascade"
     Trips ||--o{ Expenses : "cascade"
     Trips ||--o{ ChecklistItems : "cascade"
-    Trips ||--o{ Collaborators : "cascade"
 
     Users {
         Guid Id PK
@@ -183,13 +182,6 @@ erDiagram
         string Naziv
         string Kategorija "dokumenti|tehnika|garderoba|higijena|ostalo"
         bool Zavrseno
-    }
-    Collaborators {
-        Guid Id PK
-        Guid TripId FK
-        string Ime
-        string Email
-        string Uloga "view|edit"
     }
 ```
 

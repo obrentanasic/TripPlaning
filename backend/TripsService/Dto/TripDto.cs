@@ -17,7 +17,6 @@ public sealed class TripDto
     public List<AktivnostDto> Aktivnosti { get; set; } = new();
     public List<TrosakDto> Troskovi { get; set; } = new();
     public List<ChecklistItemDto> Checklist { get; set; } = new();
-    public List<SaradnikDto> Saradnici { get; set; } = new();
 }
 
 public sealed class DestinacijaDto
@@ -60,11 +59,4 @@ public sealed class ChecklistItemDto
     public string Naziv { get; set; } = string.Empty;
     public string Kategorija { get; set; } = "ostalo";
     public bool Zavrseno { get; set; }
-}
-
-public sealed class SaradnikDto
-{
-    public string Ime { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string Uloga { get; set; } = "view";
 }

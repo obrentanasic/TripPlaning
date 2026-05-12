@@ -23,7 +23,11 @@ function extractError(payload: ApiError | undefined, fallback: string): string {
 }
 
 export class HttpAuthService implements IAuthService {
-  constructor(private readonly http: AxiosInstance) {}
+  private readonly http: AxiosInstance;
+
+  constructor(http: AxiosInstance) {
+    this.http = http;
+  }
 
   async login(payload: LoginRequest): Promise<AuthResponse> {
     try {

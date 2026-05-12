@@ -18,7 +18,11 @@ function extractError(payload: ApiError | undefined, fallback: string): string {
 }
 
 export class HttpAdminService implements IAdminService {
-  constructor(private readonly http: AxiosInstance) {}
+  private readonly http: AxiosInstance;
+
+  constructor(http: AxiosInstance) {
+    this.http = http;
+  }
 
   async listUsers(): Promise<User[]> {
     try {

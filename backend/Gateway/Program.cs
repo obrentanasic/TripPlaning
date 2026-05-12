@@ -1,46 +1,16 @@
-using Putopis.Common.Auth;
+using Microsoft.ServiceFabric.Services.Runtime;
+using Putopis.Gateway;
+using Putopis.Gateway.ServiceFabric;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddPutopisJwt(builder.Configuration);
-builder.Services.AddCors(options =>
+if (Environment.GetEnvironmentVariable("Fabric_ApplicationName") is not null)
 {
-    options.AddDefaultPolicy(policy =>
-    {
-        var origins = builder.Configuration
-            .GetSection("Cors:AllowedOrigins")
-            .Get<string[]>() ?? new[] { "http://localhost:5173" };
-
-        policy
-            .WithOrigins(origins)
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
-});
-
-builder.Services
-    .AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    await ServiceRuntime.RegisterServiceAsync(
+        "Putopis.GatewayType",
+        ctx => new GatewayStatelessService(ctx));
+    await Task.Delay(Timeout.Infinite);
 }
-
-app.UseCors();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-app.MapReverseProxy();
-
-app.MapGet("/health", () => Results.Ok(new { service = "gateway", status = "ok" }));
-
-app.Run();
+else
+{
+    var app = GatewayHost.Build(args);
+    await app.RunAsync();
+}

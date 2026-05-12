@@ -36,5 +36,4 @@ public class TripEntity
     public List<ActivityEntity> Aktivnosti { get; set; } = new();
     public List<ExpenseEntity> Troskovi { get; set; } = new();
     public List<ChecklistItemEntity> Checklist { get; set; } = new();
-    public List<CollaboratorEntity> Saradnici { get; set; } = new();
 }

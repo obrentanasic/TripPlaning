@@ -49,7 +49,6 @@ public class TripsController : ControllerBase
             .Include(t => t.Aktivnosti)
             .Include(t => t.Troskovi)
             .Include(t => t.Checklist)
-            .Include(t => t.Saradnici)
             .OrderByDescending(t => t.Pocetak)
             .ToListAsync(ct);
 
@@ -71,7 +70,6 @@ public class TripsController : ControllerBase
                 .Include(t => t.Aktivnosti)
                 .Include(t => t.Troskovi)
                 .Include(t => t.Checklist)
-                .Include(t => t.Saradnici)
                 .FirstOrDefaultAsync(t => t.Id == id, ct);
         }
         else
@@ -168,7 +166,6 @@ public class TripsController : ControllerBase
             .Include(t => t.Aktivnosti)
             .Include(t => t.Troskovi)
             .Include(t => t.Checklist)
-            .Include(t => t.Saradnici)
             .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId, ct);
     }
 
@@ -221,12 +218,6 @@ public class TripsController : ControllerBase
             Naziv = c.Naziv,
             Kategorija = c.Kategorija,
             Zavrseno = c.Zavrseno,
-        }).ToList(),
-        Saradnici = e.Saradnici.Select(s => new SaradnikDto
-        {
-            Ime = s.Ime,
-            Email = s.Email,
-            Uloga = s.Uloga,
         }).ToList(),
     };
 }

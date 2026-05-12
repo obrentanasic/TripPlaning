@@ -319,58 +319,6 @@ export function TabPregled({ trip, setTab }: Props) {
             />
           </div>
         </div>
-
-        {/* Collaborators */}
-        <div className="card" style={{ padding: 24 }}>
-          <div
-            className="mono"
-            style={{
-              fontSize: 10,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'var(--ink-3)',
-              marginBottom: 12,
-            }}
-          >
-            Saradnici
-          </div>
-          {trip.saradnici.length === 0 ? (
-            <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>
-              Niste podelili plan ni sa kim.
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {trip.saradnici.map((s, i) => (
-                <div
-                  key={i}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-                >
-                  <div
-                    className="avatar"
-                    style={{
-                      background: i % 2 === 0 ? 'var(--forest)' : 'var(--gold)',
-                      width: 32,
-                      height: 32,
-                      fontSize: 12,
-                    }}
-                  >
-                    {s.ime
-                      .split(' ')
-                      .map((p) => p[0])
-                      .join('')}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13 }}>{s.ime}</div>
-                    <div style={{ fontSize: 11, color: 'var(--ink-3)' }}>{s.email}</div>
-                  </div>
-                  <span className="chip mono" style={{ fontSize: 9 }}>
-                    {s.uloga.toUpperCase()}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

@@ -72,7 +72,6 @@ export class MockTripsService implements ITripsService {
       aktivnosti: [],
       troskovi: [],
       checklist: [],
-      saradnici: [],
     };
     this.trips = [trip, ...this.trips];
     return clone(trip);

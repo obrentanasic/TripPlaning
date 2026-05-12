@@ -256,17 +256,6 @@ export function TripDetail({
             </button>
           ))}
           <div style={{ flex: 1 }} />
-          <div
-            className="mono"
-            style={{
-              fontSize: 10,
-              letterSpacing: '0.14em',
-              color: 'var(--ink-3)',
-              textTransform: 'uppercase',
-            }}
-          >
-            {trip.saradnici.length > 0 && `${trip.saradnici.length} saradnika`}
-          </div>
         </div>
       </div>
 

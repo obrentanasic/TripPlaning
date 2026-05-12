@@ -15,7 +15,7 @@ export type KategorijaChecklist =
   | 'higijena'
   | 'ostalo';
 
-export type SaradnikUloga = 'view' | 'edit';
+export type AccessLevel = 'view' | 'edit';
 
 export interface Destinacija {
   id: string;
@@ -55,12 +55,6 @@ export interface ChecklistItem {
   zavrseno: boolean;
 }
 
-export interface Saradnik {
-  ime: string;
-  email: string;
-  uloga: SaradnikUloga;
-}
-
 export interface Trip {
   id: string;
   naziv: string;
@@ -76,7 +70,6 @@ export interface Trip {
   aktivnosti: Aktivnost[];
   troskovi: Trosak[];
   checklist: ChecklistItem[];
-  saradnici: Saradnik[];
 }
 
 export interface KategorijaTroskaDef {

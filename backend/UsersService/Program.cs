@@ -1,38 +1,16 @@
-using Microsoft.EntityFrameworkCore;
-using Putopis.Common.Auth;
-using Putopis.Users.Data;
-using Putopis.Users.Services;
+using Microsoft.ServiceFabric.Services.Runtime;
+using Putopis.Users;
+using Putopis.Users.ServiceFabric;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddDbContext<UsersDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("UsersDb")));
-
-builder.Services.AddPutopisJwt(builder.Configuration);
-builder.Services.AddScoped<AuthService>();
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+if (Environment.GetEnvironmentVariable("Fabric_ApplicationName") is not null)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    await ServiceRuntime.RegisterServiceAsync(
+        "Putopis.UsersType",
+        ctx => new UsersStatelessService(ctx));
+    await Task.Delay(Timeout.Infinite);
 }
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-app.MapGet("/health", () => Results.Ok(new { service = "users", status = "ok" }));
-
-using (var scope = app.Services.CreateScope())
+else
 {
-    var db = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
-    await Seeder.SeedAsync(db);
+    var app = await UsersHost.BuildAsync(args);
+    await app.RunAsync();
 }
-
-app.Run();

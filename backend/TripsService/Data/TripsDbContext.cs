@@ -14,7 +14,6 @@ public class TripsDbContext : DbContext
     public DbSet<ActivityEntity> Activities => Set<ActivityEntity>();
     public DbSet<ExpenseEntity> Expenses => Set<ExpenseEntity>();
     public DbSet<ChecklistItemEntity> ChecklistItems => Set<ChecklistItemEntity>();
-    public DbSet<CollaboratorEntity> Collaborators => Set<CollaboratorEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -64,16 +63,6 @@ public class TripsDbContext : DbContext
             b.HasKey(x => x.Id);
             b.HasOne(x => x.Trip)
                 .WithMany(t => t.Checklist)
-                .HasForeignKey(x => x.TripId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<CollaboratorEntity>(b =>
-        {
-            b.ToTable("Collaborators");
-            b.HasKey(x => x.Id);
-            b.HasOne(x => x.Trip)
-                .WithMany(t => t.Saradnici)
                 .HasForeignKey(x => x.TripId)
                 .OnDelete(DeleteBehavior.Cascade);
         });

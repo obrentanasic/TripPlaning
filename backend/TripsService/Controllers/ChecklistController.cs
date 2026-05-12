@@ -1,8 +1,8 @@
-using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Putopis.Trips.Auth;
 using Putopis.Trips.Data;
 using Putopis.Trips.Data.Entities;
 using Putopis.Trips.Dto;
@@ -31,10 +31,8 @@ public class ChecklistController : ControllerBase
         _log = log;
     }
 
-    private Guid UserId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-    private async Task<TripEntity?> OwnedTrip(Guid tripId, CancellationToken ct) =>
-        await _db.Trips.FirstOrDefaultAsync(t => t.Id == tripId && t.UserId == UserId(), ct);
+    private Task<TripEntity?> OwnedTrip(Guid tripId, CancellationToken ct) =>
+        this.AuthorizedTripAsync(_db, tripId, ct);
 
     [HttpGet]
     public async Task<IActionResult> List(Guid tripId, CancellationToken ct)
@@ -53,6 +51,7 @@ public class ChecklistController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(Guid tripId, [FromBody] ChecklistCreateRequest req, CancellationToken ct)
     {
+        if (User.IsShareReadOnly()) return Forbid();
         var v = await _create.ValidateAsync(req, ct);
         if (!v.IsValid) return BadRequest(new { error = v.Errors[0].ErrorMessage });
 
@@ -76,6 +75,7 @@ public class ChecklistController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid tripId, Guid id, [FromBody] ChecklistUpdateRequest req, CancellationToken ct)
     {
+        if (User.IsShareReadOnly()) return Forbid();
         var v = await _update.ValidateAsync(req, ct);
         if (!v.IsValid) return BadRequest(new { error = v.Errors[0].ErrorMessage });
 
@@ -96,6 +96,7 @@ public class ChecklistController : ControllerBase
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> Toggle(Guid tripId, Guid id, [FromBody] ChecklistTogglePatch req, CancellationToken ct)
     {
+        if (User.IsShareReadOnly()) return Forbid();
         if (await OwnedTrip(tripId, ct) is null)
             return NotFound(new { error = "Plan nije pronađen." });
 
@@ -110,6 +111,7 @@ public class ChecklistController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid tripId, Guid id, CancellationToken ct)
     {
+        if (User.IsShareReadOnly()) return Forbid();
         if (await OwnedTrip(tripId, ct) is null)
             return NotFound(new { error = "Plan nije pronađen." });
 

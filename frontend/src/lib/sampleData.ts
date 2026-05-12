@@ -85,10 +85,6 @@ export const SAMPLE_TRIPS: Trip[] = [
       { id: 'c11', naziv: 'Lijekovi i prva pomoć', kategorija: 'higijena', zavrseno: false },
       { id: 'c12', naziv: 'Kontaktna sočiva + naočale', kategorija: 'higijena', zavrseno: true },
     ],
-    saradnici: [
-      { ime: 'Marko Petrović', email: 'marko@email.com', uloga: 'edit' },
-      { ime: 'Ana Jovanović', email: 'ana@email.com', uloga: 'view' },
-    ],
   },
   {
     id: 't2',
@@ -117,7 +113,6 @@ export const SAMPLE_TRIPS: Trip[] = [
       { id: 'e11', naziv: 'Hotel (3 noći)', kategorija: 'smestaj', iznos: 240, datum: '2026-04-12', opis: '' },
     ],
     checklist: [],
-    saradnici: [],
   },
   {
     id: 't3',
@@ -134,6 +129,5 @@ export const SAMPLE_TRIPS: Trip[] = [
     aktivnosti: [],
     troskovi: [],
     checklist: [],
-    saradnici: [],
   },
 ];

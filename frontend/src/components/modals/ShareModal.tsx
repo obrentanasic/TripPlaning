@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import type { SaradnikUloga, Trip } from '../../models/Trip';
+import type { AccessLevel, Trip } from '../../models/Trip';
 import { useService } from '../../hooks/useService';
 import { useToast } from '../../context/ToastContext';
 import { Icon } from '../ui/Icon';
@@ -8,20 +8,18 @@ import { Icon } from '../ui/Icon';
 interface Props {
   trip: Trip;
   onClose: () => void;
-  onAddCollab: (collab: { ime: string; email: string; uloga: SaradnikUloga }) => void;
 }
 
-export function ShareModal({ trip, onClose, onAddCollab }: Props) {
+export function ShareModal({ trip, onClose }: Props) {
   const shareApi = useService('share');
   const { show } = useToast();
 
-  const [accessLevel, setAccessLevel] = useState<SaradnikUloga>('view');
+  const [accessLevel, setAccessLevel] = useState<AccessLevel>('view');
   const [token, setToken] = useState<string | null>(null);
   const [url, setUrl] = useState<string>('');
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [email, setEmail] = useState('');
 
   // Issue a token whenever the access level changes (or on first open).
   useEffect(() => {
@@ -79,17 +77,6 @@ export function ShareModal({ trip, onClose, onAddCollab }: Props) {
     link.download = `putopis-${trip.id}-${accessLevel}.svg`;
     link.click();
     URL.revokeObjectURL(link.href);
-  };
-
-  const sendInvite = () => {
-    const trimmed = email.trim();
-    if (!trimmed.includes('@')) return;
-    onAddCollab({
-      ime: trimmed.split('@')[0],
-      email: trimmed,
-      uloga: accessLevel,
-    });
-    setEmail('');
   };
 
   return (
@@ -321,98 +308,6 @@ export function ShareModal({ trip, onClose, onAddCollab }: Props) {
               </div>
             </div>
           </div>
-
-          {/* Email invite */}
-          <div style={{ marginTop: 24 }}>
-            <div
-              className="mono"
-              style={{
-                fontSize: 10,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: 'var(--ink-3)',
-                marginBottom: 10,
-              }}
-            >
-              Pozovi e-mailom
-            </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@adresa.com"
-                onKeyDown={(e) => e.key === 'Enter' && sendInvite()}
-              />
-              <button className="btn btn-terra btn-sm" onClick={sendInvite}>
-                Pošalji
-              </button>
-            </div>
-          </div>
-
-          {/* Collaborators */}
-          {trip.saradnici.length > 0 && (
-            <div
-              style={{
-                marginTop: 24,
-                paddingTop: 24,
-                borderTop: '1px solid var(--rule)',
-              }}
-            >
-              <div
-                className="mono"
-                style={{
-                  fontSize: 10,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  color: 'var(--ink-3)',
-                  marginBottom: 12,
-                }}
-              >
-                Trenutni saradnici ({trip.saradnici.length})
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {trip.saradnici.map((s, i) => (
-                  <div
-                    key={`${s.email}-${i}`}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      padding: 10,
-                      background: 'var(--bg-2)',
-                    }}
-                  >
-                    <div
-                      className="avatar"
-                      style={{
-                        background: i % 2 === 0 ? 'var(--forest)' : 'var(--gold)',
-                        width: 32,
-                        height: 32,
-                        fontSize: 12,
-                      }}
-                    >
-                      {s.ime
-                        .split(' ')
-                        .map((p) => p[0])
-                        .join('')}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>{s.ime}</div>
-                      <div style={{ fontSize: 11, color: 'var(--ink-3)' }}>
-                        {s.email}
-                      </div>
-                    </div>
-                    <span
-                      className={`chip mono ${s.uloga === 'edit' ? 'chip-terra' : ''}`}
-                      style={{ fontSize: 9 }}
-                    >
-                      {s.uloga.toUpperCase()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

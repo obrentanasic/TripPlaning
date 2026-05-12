@@ -10,7 +10,6 @@ import { ConfirmDialog } from './components/modals/ConfirmDialog';
 import { ShareModal } from './components/modals/ShareModal';
 import { PdfPreview } from './components/modals/PdfPreview';
 import { AdminPanel } from './components/admin/AdminPanel';
-import type { SaradnikUloga } from './models/Trip';
 import { useService } from './hooks/useService';
 import type { Trip } from './models/Trip';
 import type { CreateTripRequest } from './dto/trip.dto';
@@ -66,19 +65,6 @@ function Shell() {
   // to refresh App-level state without a second round-trip.
   const patchTrip = (next: Trip) => {
     setTrips((prev) => prev.map((t) => (t.id === next.id ? next : t)));
-  };
-
-  const addCollaborator = (collab: { ime: string; email: string; uloga: SaradnikUloga }) => {
-    const openTrip = trips.find((t) => t.id === openTripId);
-    if (!openTrip) return;
-    if (openTrip.saradnici.some((s) => s.email === collab.email)) {
-      show('Saradnik je već dodan.');
-      return;
-    }
-    // Collaborators are persisted server-side in Checkpoint 11 (sharing).
-    // Keep them in client state so the UI feedback stays correct.
-    patchTrip({ ...openTrip, saradnici: [...openTrip.saradnici, collab] });
-    show('Saradnik dodan');
   };
 
   const open = (id: string) => {
@@ -169,7 +155,6 @@ function Shell() {
             <ShareModal
               trip={openTrip}
               onClose={() => setShowShare(false)}
-              onAddCollab={addCollaborator}
             />
           );
         })()}
