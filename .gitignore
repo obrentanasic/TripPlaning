@@ -31,3 +31,4 @@ docs/api.html
 
 # Claude Code local settings
 .claude/
+start_komsha_claude.bat

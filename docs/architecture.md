@@ -95,10 +95,10 @@ graph LR
     Gateway -->|"Authorization: Bearer<br/>JWT scheme"| Bearer{JWT validan?}
     Gateway -->|"X-Share-Token<br/>ShareToken scheme"| ShareScheme{Token aktivan?}
 
-    Bearer -->|Da| ClaimsJ[ClaimsPrincipal<br/>sub=userId<br/>role=korisnik\|admin]
+    Bearer -->|Da| ClaimsJ["ClaimsPrincipal<br/>sub=userId<br/>role=korisnik / admin"]
     Bearer -->|Ne| Unauth401[401 Unauthorized]
 
-    ShareScheme -->|Da| ClaimsS[ClaimsPrincipal<br/>NameIdentifier=tripId<br/>role=share<br/>accessLevel=view\|edit]
+    ShareScheme -->|Da| ClaimsS["ClaimsPrincipal<br/>NameIdentifier=tripId<br/>role=share<br/>accessLevel=view / edit"]
     ShareScheme -->|Ne| Unauth401
 
     ClaimsJ --> Controller

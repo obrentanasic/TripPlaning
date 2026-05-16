@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Putopis.Trips", "TripsServi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Putopis.Share", "ShareService\Putopis.Share.csproj", "{FEFC59E1-0D6A-42D8-8CB3-2FE32B56AE81}"
 EndProject
+Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "Putopis.Application", "PutopisCluster\Putopis.Application.sfproj", "{A6B1C000-1111-4444-8888-AAAAAAAAAAAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,11 +91,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{6FEA884C-B82C-491E-9F08-8BFB518CBEB7} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
-		{05195942-38CC-4C0E-90AB-9845DA822CE6} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
-		{145DB7CC-7D0E-4F17-BDB3-FB52EB7F1354} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
-		{FE99803A-0E88-45AD-99A0-619AD1DC81CB} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
-		{FEFC59E1-0D6A-42D8-8CB3-2FE32B56AE81} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0C575658-89EE-4973-9F08-32E9D0F9096F}
 	EndGlobalSection
 EndGlobal
