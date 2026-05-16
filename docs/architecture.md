@@ -106,7 +106,7 @@ graph LR
 
     Controller -->|JWT user| Owner{trip.UserId<br/>== user.sub?}
     Controller -->|Share user| TripGuard{tripId<br/>== claim.tripId?}
-    Controller -->|Mutating + share| EditGuard{accessLevel<br/>== "edit"?}
+    Controller -->|Mutating + share| EditGuard{"accessLevel<br/>== edit?"}
 
     Owner -->|Ne| NotFound[404]
     TripGuard -->|Ne| NotFound
