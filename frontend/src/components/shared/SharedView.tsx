@@ -7,6 +7,7 @@ import { HttpTripsService } from '../../services/http-trips.service';
 import { HttpShareService } from '../../services/share.service';
 import { HttpAuthService } from '../../services/auth.service';
 import { HttpAdminService } from '../../services/admin.service';
+import { HttpStatusService } from '../../services/status.service';
 import { http } from '../../services/http';
 import type { Services } from '../../services';
 import type { Trip } from '../../models/Trip';
@@ -37,6 +38,7 @@ export function SharedView({ token }: Props) {
     trips: new HttpTripsService(sharedHttp),
     share: new HttpShareService(sharedHttp),
     admin: new HttpAdminService(http),
+    status: new HttpStatusService(),
   }), [sharedHttp]);
 
   return (

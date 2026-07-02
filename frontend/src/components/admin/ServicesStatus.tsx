@@ -1,55 +1,23 @@
-import { useEffect, useState } from 'react';
-
-interface ServiceProbe {
-  name: string;
-  url: string;
-  type: 'stateless' | 'stateful';
-  status: 'unknown' | 'ok' | 'down';
-  latencyMs?: number;
-  payload?: unknown;
-}
-
-const apiBase =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
-  'http://localhost:8080/api';
-
-const gatewayHealth = apiBase.replace(/\/api\/?$/, '/health');
-
-const initial: ServiceProbe[] = [
-  { name: 'Gateway',       url: gatewayHealth,                          type: 'stateless', status: 'unknown' },
-  { name: 'UsersService',  url: 'http://localhost:8081/health',         type: 'stateless', status: 'unknown' },
-  { name: 'TripsService',  url: 'http://localhost:8082/health',         type: 'stateless', status: 'unknown' },
-  { name: 'ShareService',  url: 'http://localhost:8083/health',         type: 'stateful',  status: 'unknown' },
-];
-
-async function probe(p: ServiceProbe): Promise<ServiceProbe> {
-  const start = performance.now();
-  try {
-    const res = await fetch(p.url, { method: 'GET' });
-    const elapsed = Math.round(performance.now() - start);
-    if (!res.ok) return { ...p, status: 'down', latencyMs: elapsed };
-    const payload = await res.json().catch(() => undefined);
-    return { ...p, status: 'ok', latencyMs: elapsed, payload };
-  } catch {
-    return { ...p, status: 'down', latencyMs: Math.round(performance.now() - start) };
-  }
-}
+import { useCallback, useEffect, useState } from 'react';
+import { useService } from '../../hooks/useService';
+import type { ServiceProbe } from '../../services/status.service';
 
 export function ServicesStatus() {
-  const [probes, setProbes] = useState<ServiceProbe[]>(initial);
+  const statusApi = useService('status');
+  const [probes, setProbes] = useState<ServiceProbe[]>(() => statusApi.targets());
   const [refreshAt, setRefreshAt] = useState<Date | null>(null);
 
-  const refresh = async () => {
-    const results = await Promise.all(initial.map(probe));
+  const refresh = useCallback(async () => {
+    const results = await statusApi.probeAll();
     setProbes(results);
     setRefreshAt(new Date());
-  };
+  }, [statusApi]);
 
   useEffect(() => {
     refresh();
     const id = window.setInterval(refresh, 15_000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [refresh]);
 
   return (
     <div>

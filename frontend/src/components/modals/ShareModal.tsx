@@ -303,7 +303,7 @@ export function ShareModal({ trip, onClose }: Props) {
                 }}
               >
                 {token
-                  ? `Token istječe ${expiresLabel} · Token tip: ${accessLevel.toUpperCase()}`
+                  ? `Token ističe ${expiresLabel} · Token tip: ${accessLevel.toUpperCase()}`
                   : 'Token nije generisan.'}
               </div>
             </div>

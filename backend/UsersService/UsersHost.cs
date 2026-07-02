@@ -19,6 +19,17 @@ public static class UsersHost
         builder.Services.AddPutopisJwt(builder.Configuration);
         builder.Services.AddScoped<AuthService>();
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                var origins = builder.Configuration
+                    .GetSection("Cors:AllowedOrigins")
+                    .Get<string[]>() ?? new[] { "http://localhost:5173" };
+                policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+            });
+        });
+
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -31,6 +42,7 @@ public static class UsersHost
             app.UseSwaggerUI();
         }
 
+        app.UseCors();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

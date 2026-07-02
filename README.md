@@ -107,6 +107,43 @@ Health check: `curl http://localhost:8080/health` → `{"service":"gateway","sta
 
 `backend/PutopisCluster/ApplicationParameters/Local.5Node.xml` koristi 3 replike za stateful servis. Za 1-Node cluster koristiti `Local.1Node.xml` (replikset = 1).
 
+**Važno — LocalDB i Service Fabric:** SF pokreće servise pod sistemskim nalogom koji ne može da koristi per-user `(localdb)\MSSQLLocalDB` instancu. Zato je instanca deljena pod imenom `PutopisShared` (connection stringovi koriste `(localdb)\.\PutopisShared`). Jednokratni setup (admin PowerShell za `share`, ostalo obično):
+
+```powershell
+sqllocaldb share MSSQLLocalDB PutopisShared     # zahteva admin
+sqllocaldb start MSSQLLocalDB
+# zatim u instanci dodati logine za SF naloge (SSMS/sqlcmd kao vlasnik):
+#   CREATE LOGIN [NT AUTHORITY\SYSTEM] FROM WINDOWS;
+#   CREATE LOGIN [NT AUTHORITY\NETWORK SERVICE] FROM WINDOWS;
+#   ALTER SERVER ROLE sysadmin ADD MEMBER [NT AUTHORITY\SYSTEM];
+#   ALTER SERVER ROLE sysadmin ADD MEMBER [NT AUTHORITY\NETWORK SERVICE];
+```
+
+Posle restarta računara, ako Users/Trips servisi ne mogu da se podignu, pokrenuti `sqllocaldb start MSSQLLocalDB` (deljenu instancu može auto-startovati samo vlasnik).
+
+### 3b. Service Fabric deployment iz komandne linije (bez VS GUI-a)
+
+```powershell
+# 1. Kreiraj lokalni dev cluster (jednom, admin PowerShell):
+& "$env:ProgramFiles\Microsoft SDKs\Service Fabric\ClusterSetup\DevClusterSetup.ps1" -CreateOneNodeCluster
+
+# 2. Package (VS 2022 MSBuild — VS 18 nema SF Tools komponentu):
+& "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe" `
+    backend\PutopisCluster\Putopis.Application.sfproj `
+    /t:Package /p:Configuration=Release /p:VisualStudioVersion=17.0
+
+# 3. Deploy:
+Import-Module ServiceFabric
+Connect-ServiceFabricCluster localhost:19000
+Copy-ServiceFabricApplicationPackage -ApplicationPackagePath backend\PutopisCluster\pkg\Release `
+    -ImageStoreConnectionString "file:C:\SfDevCluster\Data\ImageStoreShare" -ApplicationPackagePathInImageStore PutopisType
+Register-ServiceFabricApplicationType -ApplicationPathInImageStore PutopisType
+New-ServiceFabricApplication -ApplicationName fabric:/Putopis -ApplicationTypeName PutopisType -ApplicationTypeVersion 1.0.0 `
+    -ApplicationParameter @{ Gateway_InstanceCount='1'; Users_InstanceCount='1'; Trips_InstanceCount='1'; Share_PartitionCount='1'; Share_TargetReplicaSetSize='1'; Share_MinReplicaSetSize='1' }
+```
+
+Service Fabric Explorer: http://localhost:19080. Redeploy = `Remove-ServiceFabricApplication` + `Unregister-ServiceFabricApplicationType` pa koraci 2–3 ponovo.
+
 ---
 
 ## Frontend env
@@ -115,6 +152,9 @@ Health check: `curl http://localhost:8080/health` → `{"service":"gateway","sta
 ```
 VITE_API_BASE_URL=http://localhost:8080/api
 VITE_SHARE_BASE_URL=http://localhost:5173/share
+VITE_USERS_HEALTH_URL=http://localhost:8081/health
+VITE_TRIPS_HEALTH_URL=http://localhost:8082/health
+VITE_SHARE_HEALTH_URL=http://localhost:8083/health
 ```
 
 Aplikacija sve URL-ove čita iz env-a — promena gateway porta zahteva samo izmenu `.env` + restart Vite dev servera (`npm run dev`).

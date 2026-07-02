@@ -30,6 +30,17 @@ public static class ShareHost
             builder.Services.AddSingleton<IShareTokenStore, InMemoryShareTokenStore>();
         }
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                var origins = builder.Configuration
+                    .GetSection("Cors:AllowedOrigins")
+                    .Get<string[]>() ?? new[] { "http://localhost:5173" };
+                policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+            });
+        });
+
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -42,6 +53,7 @@ public static class ShareHost
             app.UseSwaggerUI();
         }
 
+        app.UseCors();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

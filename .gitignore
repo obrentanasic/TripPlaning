@@ -11,6 +11,7 @@ backend/**/obj/
 backend/**/*.user
 backend/.vs/
 backend/packages/
+backend/PutopisCluster/pkg/
 
 # Editor
 .vscode/

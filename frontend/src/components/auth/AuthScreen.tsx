@@ -281,31 +281,7 @@ export function AuthScreen() {
               {!loading && <Icon.arrow />}
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0' }}>
-              <hr className="divider" style={{ flex: 1 }} />
-              <span
-                className="mono"
-                style={{
-                  fontSize: 10,
-                  letterSpacing: '0.14em',
-                  color: 'var(--ink-3)',
-                  textTransform: 'uppercase',
-                }}
-              >
-                ILI
-              </span>
-              <hr className="divider" style={{ flex: 1 }} />
-            </div>
-
-            <button
-              type="button"
-              className="btn btn-ghost"
-              style={{ justifyContent: 'center', padding: '12px 18px', cursor: 'not-allowed', opacity: 0.6 }}
-              disabled
-              title="LDAP/SSO — planirana funkcionalnost"
-            >
-              <Icon.globe /> Prijava putem LDAP / SSO
-            </button>
+            
           </form>
 
           <div

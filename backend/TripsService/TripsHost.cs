@@ -39,6 +39,17 @@ public static class TripsHost
         builder.Services.AddMemoryCache();
         builder.Services.AddValidatorsFromAssemblyContaining(typeof(TripsHost));
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                var origins = builder.Configuration
+                    .GetSection("Cors:AllowedOrigins")
+                    .Get<string[]>() ?? new[] { "http://localhost:5173" };
+                policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+            });
+        });
+
         builder.Services.AddHttpClient(ShareServiceClient.HttpClientName, c =>
         {
             var url = builder.Configuration["Services:Share"] ?? "http://localhost:8083";
@@ -59,6 +70,7 @@ public static class TripsHost
             app.UseSwaggerUI();
         }
 
+        app.UseCors();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
